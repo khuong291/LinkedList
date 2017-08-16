@@ -32,6 +32,19 @@ final class LinkedList<T> {
         return tail
     }
     
+    var count: Int {
+        if var node = head {
+            var c = 1
+            while case let next? = node.next {
+                node = next
+                c += 1
+            }
+            return c
+        } else {
+            return 0
+        }
+    }
+    
     func append(_ value: T) {
         let newNode = Node(value: value)
         if let tail = tail {
@@ -41,6 +54,37 @@ final class LinkedList<T> {
             head = newNode
         }
         tail = newNode
+    }
+    
+    private func nodesBeforeAndAfter(index: Int) -> (Node<T>?, Node<T>?) {
+        assert(index >= 0)
+        
+        var i = index
+        var next = head
+        var prev: Node<T>?
+        
+        while next != nil && i > 0 {
+            i -= 1
+            prev = next
+            next = next!.next
+        }
+        assert(i == 0)
+        
+        return (prev, next)
+    }
+    
+    func insert(value: T, at index: Int) {
+        let (prev, next) = nodesBeforeAndAfter(index: index)
+        
+        let newNode = Node(value: value)
+        newNode.previous = prev
+        newNode.next = next
+        prev?.next = newNode
+        next?.previous = newNode
+        
+        if prev == nil {
+            head = newNode
+        }
     }
     
     func index(of idx: Int) -> Node<T>? {
@@ -54,6 +98,12 @@ final class LinkedList<T> {
             }
         }
         return nil
+    }
+    
+    subscript(_ idx: Int) -> T? {
+        let node = index(of: idx)
+        assert(node != nil)
+        return node!.value
     }
     
     func remove(node: Node<T>) -> T? {
@@ -96,9 +146,10 @@ final class LinkedList<T> {
 var myList = LinkedList<Int>()
 myList.append(1)
 myList.append(2)
-myList.append(3)
-let node = myList.index(of: 2)!
-myList.remove(node: node)
+myList.append(4)
+myList.insert(value: 3, at: 2)
+
 myList.getAllValues().forEach {
     print($0)
 }
+print(myList.count)
