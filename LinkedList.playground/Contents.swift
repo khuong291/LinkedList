@@ -1,76 +1,84 @@
-//: Playground - noun: a place where people can play
-
 import Foundation
 
-final class Node<T: Strideable> {
+final class Node<T> {
     var value: T? = nil
     var next: Node? = nil
+    weak var previous: Node?
     
     init(value: T? = nil, next: Node? = nil) {
         self.value = value
         self.next = next
     }
+    
+    deinit {
+        print("Deinit at Value = \(String(describing: value))")
+    }
 }
 
-final class LinkedList<T: Strideable> {
+final class LinkedList<T> {
     
-    fileprivate var head: Node<T>?
+    private var head: Node<T>?
     private var tail: Node<T>?
     
-    public var isEmpty: Bool {
+    var isEmpty: Bool {
         return head == nil
     }
     
-    public var first: Node<T>? {
+    var first: Node<T>? {
         return head
     }
     
-    public var last: Node<T>? {
+    var last: Node<T>? {
         return tail
     }
     
     func append(_ value: T) {
-        // if empty list
-        if isEmpty {
-            head = Node(value: value)
+        let newNode = Node(value: value)
+        if let tail = tail {
+            newNode.previous = tail
+            tail.next = newNode
         } else {
-            // Find the last node without a next value
-            var lastNode = head!
-            while lastNode.next != nil {
-                lastNode = lastNode.next!
-            }
-            // Once found, create a new node and connect the linked list
-            let newNode = Node<T>(value: value)
-            lastNode.next = newNode
+            head = newNode
         }
+        tail = newNode
     }
     
-    func remove(_ value: T) {
-        // if empty list
-        guard !isEmpty else { return }
-        // Check if the value is at the head
-        if value == head!.value {
-            head = head!.next
-        }
-        //Traverse the linked list to see if node is in the linked list
-        if head!.value != nil {
-            var node = head!
-            var previousNode: Node<T>!
-            // If value is found, exit the loop
-            while node.value != value && node.next != nil {
-                previousNode = node
-                node = node.next!
-            }
-            // Once found, connect the previous node to the current node's next
-            if node.value == value {
-                if node.next != nil {
-                    previousNode.next = node.next
-                } else {
-                    //if at the end, the next is nil 
-                    previousNode.next = nil
-                }
+    func index(of idx: Int) -> Node<T>? {
+        if idx >= 0 {
+            var node = head
+            var i = idx
+            while node != nil {
+                if i == 0 { return node }
+                i -= 1
+                node = node!.next
             }
         }
+        return nil
+    }
+    
+    func remove(node: Node<T>) -> T? {
+        let prev = node.previous
+        let next = node.next
+        
+        if let prev = prev {
+            prev.next = next
+        } else {
+            head = next
+        }
+        next?.previous = prev
+        if next == nil {
+            tail = prev
+        }
+
+        node.previous = nil 
+        node.next = nil
+        
+        return node.value
+    }
+    
+    func removeAll() {
+        head = nil
+        tail = nil
     }
     
     func getAllValues() -> [T] {
@@ -86,10 +94,11 @@ final class LinkedList<T: Strideable> {
 
 // TEST
 var myList = LinkedList<Int>()
-myList.append(100)
-myList.append(200)
-myList.append(300)
-myList.remove(100)
+myList.append(1)
+myList.append(2)
+myList.append(3)
+let node = myList.index(of: 2)!
+myList.remove(node: node)
 myList.getAllValues().forEach {
     print($0)
 }
