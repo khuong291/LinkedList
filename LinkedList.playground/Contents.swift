@@ -144,6 +144,18 @@ final class LinkedList<T> {
             head = currentNode
         }
     }
+    
+    func append(_ list: LinkedList) {
+        guard !list.isEmpty else { return }
+        if let tail = tail {
+            tail.next = list.first
+        }
+        tail = list.tail
+    }
+    
+    func sort() {
+        
+    }
 }
 
 // TEST
@@ -154,10 +166,17 @@ myList.append(4)
 myList.append(5)
 myList.insert(value: 3, at: 2)
 myList.remove(at: 1)
-myList.getAllValues().forEach {
-    print($0)
-}
+
 myList.reverse()
 myList.last?.value
 myList.first?.value
-print(myList.count)
+
+var mySecondList = LinkedList<Int>()
+mySecondList.append(10)
+mySecondList.append(11)
+
+myList.append(mySecondList)
+
+myList.getAllValues().forEach {
+    print($0)
+}
