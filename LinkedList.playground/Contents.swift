@@ -1,3 +1,5 @@
+// COPY RIGHT 2017 (C) KHUONG PHAM
+
 import Foundation
 
 final class Node<T> {
@@ -56,31 +58,17 @@ final class LinkedList<T> {
         tail = newNode
     }
     
-    private func nodesBeforeAndAfter(index: Int) -> (Node<T>?, Node<T>?) {
-        assert(index >= 0)
-        
-        var i = index
-        var next = head
-        var prev: Node<T>?
-        
-        while next != nil && i > 0 {
-            i -= 1
-            prev = next
-            next = next!.next
-        }
-        assert(i == 0)
-        
-        return (prev, next)
-    }
-    
-    func insert(value: T, at index: Int) {
-        let (prev, next) = nodesBeforeAndAfter(index: index)
+    func insert(value: T, at idx: Int) {
+        guard idx >= 0 else { return }
         
         let newNode = Node(value: value)
+        let node = index(of: idx)
+        let prev = node?.previous
+        
         newNode.previous = prev
-        newNode.next = next
+        newNode.next = node
         prev?.next = newNode
-        next?.previous = newNode
+        node?.previous = newNode
         
         if prev == nil {
             head = newNode
@@ -90,10 +78,10 @@ final class LinkedList<T> {
     func index(of idx: Int) -> Node<T>? {
         if idx >= 0 {
             var node = head
-            var i = idx
+            var i = 0
             while node != nil {
-                if i == 0 { return node }
-                i -= 1
+                if i == idx { return node }
+                i += 1
                 node = node!.next
             }
         }
@@ -126,6 +114,12 @@ final class LinkedList<T> {
         return node.value
     }
     
+    func remove(at idx: Int) {
+        assert(idx > 0)
+        guard let node = index(of: idx) else { return }
+        remove(node: node)
+    }
+    
     func removeAll() {
         head = nil
         tail = nil
@@ -140,6 +134,16 @@ final class LinkedList<T> {
         }
         return arr
     }
+    
+    func reverse() {
+        var node = head
+        tail = node
+        while let currentNode = node {
+            node = currentNode.next
+            swap(&currentNode.next, &currentNode.previous)
+            head = currentNode
+        }
+    }
 }
 
 // TEST
@@ -147,9 +151,13 @@ var myList = LinkedList<Int>()
 myList.append(1)
 myList.append(2)
 myList.append(4)
+myList.append(5)
 myList.insert(value: 3, at: 2)
-
+myList.remove(at: 1)
 myList.getAllValues().forEach {
     print($0)
 }
+myList.reverse()
+myList.last?.value
+myList.first?.value
 print(myList.count)
